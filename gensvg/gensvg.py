@@ -9,23 +9,23 @@ stroke_color = "black"
 def group_of_octaves(
     x: float,
     y: float,
-    generator_x_increment: float,
+    x_unit: float,
     octave_height: float,
     octaves: int = 1,
     circles: int = 1,
-    divisions: int = 12,
+    pitches: int = 12,
     generator: int = 7,
     skew: float = 1,
 ) -> draw.Group:
 
     octave_coordinates = [
         (
-            circle * divisions_of_octave * generator_x_increment + ((generator * (division + (divisions / 2)) % divisions) * generator_x_increment),
-            octave * octave_height + (division * (octave_height / divisions)),
+            (circle * pitches + ((pitch + pitches / 2) * generator) % pitches) * x_unit,
+            octave * octave_height + (pitch * (octave_height / pitches)),
         )
         for octave in range(octaves)
         for circle in range(circles)
-        for division in range(divisions)
+        for pitch in range(pitches)
     ]
     notes = draw.Group()
 
@@ -49,7 +49,7 @@ pixels_per_mm = 96 / 25.4
 pixels_per_m = pixels_per_mm * 1000
 pixels_per_point = 96 / 72
 
-divisions_of_octave = 12
+pitch_classes_per_octave = 12
 generator = 7
 
 stroke_width = 1 * pixels_per_point
@@ -57,7 +57,7 @@ key_radius = (7.3 * pixels_per_mm) - stroke_width / 2
 generator_x_unit = 8.5 * pixels_per_mm
 octave_height = 38.553 * pixels_per_mm
 
-string_length = 2 * divisions_of_octave * generator_x_unit
+string_length = 2 * pitch_classes_per_octave * generator_x_unit
 
 d = draw.Drawing(
     2 ** (1 / 4) * pixels_per_m,
