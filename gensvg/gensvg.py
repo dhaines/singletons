@@ -20,12 +20,16 @@ def group_of_octaves(
 
     octave_coordinates = [
         # add in circles of fifts and octaves
-        key
+        (
+            circle * divisions_of_octave * generator_x_increment + key[0],
+            octave * octave_height + key[1],
+        )
         for octave in range(octaves)
         for circle in range(circles)
         for key in zip(
             [
-                (((generator * (i + (divisions / 2))) % (divisions))) * generator_x_increment
+                (((generator * (i + (divisions / 2))) % (divisions)))
+                * generator_x_increment
                 for i in range(divisions)
             ],
             [j * (octave_height / divisions) for j in range(divisions)],
@@ -93,7 +97,7 @@ for i in [1, 2, 3, 5, 7, 11]:
     y -= deflection * 4
 
 
-d.append(group_of_octaves(0, 0, generator_x_unit, octave_height, 2, 2))
+d.append(group_of_octaves(0, 0, generator_x_unit, octave_height, 3, 3))
 
 # d.append(group_of_octaves(0, 0, generator_x_unit, octave_height, 3, 3, 12, 7))
 # d.append(group_of_octaves(0, -768, generator_x_unit, octave_height, 3, 3, 12, 7, 1.1))
