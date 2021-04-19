@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import drawSvg as draw
+import math
 
 fill_color = "none"
 stroke_color = "black"
@@ -15,13 +16,13 @@ def group_of_octaves(
     circles: int = 1,
     pitches: int = 12,
     generator: int = 7,
-    skew: float = 1,
+    skew: float = 0,
 ) -> draw.Group:
 
     octave_coordinates = [
         (
-            (circle * pitches + ((pitch + pitches / 2) * generator) % pitches) * x_unit,
-            octave * octave_height + (pitch * (octave_height / pitches)),
+            circle * pitches + pitch * generator % pitches,
+            octave + pitch / pitches
         )
         for octave in range(octaves)
         for circle in range(circles)
@@ -30,11 +31,12 @@ def group_of_octaves(
     notes = draw.Group()
 
     for coordinates in octave_coordinates:
-        print(coordinates)
+        # print(coordinates)
+        print((coordinates[0], coordinates[1] + coordinates[0] * skew))
         notes.append(
             draw.Circle(
-                x + coordinates[0],
-                y + coordinates[1],
+                x + coordinates[0] * x_unit,
+                y + coordinates[1] * octave_height + coordinates[0] * skew,
                 key_radius,
                 stroke=stroke_color,
                 fill=fill_color,
@@ -89,10 +91,8 @@ for i in [1, 2, 3, 5, 7, 11]:
     y -= deflection * 4
 
 
-d.append(group_of_octaves(0, 0, generator_x_unit, octave_height, 3, 3, 12, 7, 1.1))
-
-# d.append(group_of_octaves(0, 0, generator_x_unit, octave_height, 3, 3, 12, 7))
-# d.append(group_of_octaves(0, -768, generator_x_unit, octave_height, 3, 3, 12, 7, 1.1))
-# d.append(group_of_octaves(0, -1440, generator_x_unit, octave_height, 3, 3, 12, 7, -1.1))
+d.append(group_of_octaves(0, 0, generator_x_unit, octave_height, 13, 13, 12, 7, math.log2(1)))
+# d.append(group_of_octaves(0, 0, generator_x_unit, octave_height, 13, 13, 12, 7, 12 * math.log2(3**12/2**19)))
+# d.append(group_of_octaves(0, 0, generator_x_unit, octave_height, 13, 13, 12, 7, -12 * 3 * math.log2(3**4/((2**4)*5))))
 
 d.saveSvg("out.svg")
