@@ -30,6 +30,9 @@ def group_of_octaves(
     ]
     notes = draw.Group()
 
+    # A guess, but it looks right.
+    skew *= pitches ** 2
+
     for coordinates in octave_coordinates:
         # print(coordinates)
         print((coordinates[0], coordinates[1] + coordinates[0] * skew))
@@ -87,12 +90,17 @@ for i in [1, 2, 3, 5, 7, 11]:
         string.append(p)
         x += length
 
-    d.append(string)
+    # d.append(string)
     y -= deflection * 4
 
 
-d.append(group_of_octaves(0, 0, generator_x_unit, octave_height, 13, 13, 12, 7, math.log2(1)))
-# d.append(group_of_octaves(0, 0, generator_x_unit, octave_height, 13, 13, 12, 7, 12 * math.log2(3**12/2**19)))
-# d.append(group_of_octaves(0, 0, generator_x_unit, octave_height, 13, 13, 12, 7, -12 * 3 * math.log2(3**4/((2**4)*5))))
+# ET
+d.append(group_of_octaves(0, 0, generator_x_unit, octave_height, 28, 19, 12, 7, math.log2(1)))
+
+# Pythagorean
+d.append(group_of_octaves(0, 0, generator_x_unit, octave_height, 28, 19, 12, 7, math.log2(3**12/2**19) / 12))
+
+# 1/4 comma meantone
+d.append(group_of_octaves(0, 0, generator_x_unit, octave_height, 28, 19, 12, 7, -(math.log2(3**4/((2**4)*5)) / 4)))
 
 d.saveSvg("out.svg")
