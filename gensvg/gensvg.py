@@ -28,7 +28,7 @@ def group_of_octaves(
         for circle in range(circles)
         for pitch in range(pitches)
     ]
-    notes = draw.Group()
+    keys = draw.Group()
 
     # A guess, but it looks right.
     skew *= pitches ** 2
@@ -36,7 +36,7 @@ def group_of_octaves(
     for coordinates in octave_coordinates:
         # print(coordinates)
         print((coordinates[0], coordinates[1] + coordinates[0] * skew))
-        notes.append(
+        keys.append(
             draw.Circle(
                 x + coordinates[0] * x_unit,
                 y + coordinates[1] * octave_height + coordinates[0] * skew,
@@ -47,7 +47,7 @@ def group_of_octaves(
             )
         )
 
-    return notes
+    return keys
 
 
 pixels_per_mm = 96 / 25.4
@@ -62,14 +62,24 @@ key_radius = (7.3 * pixels_per_mm) - stroke_width / 2
 generator_x_unit = 8.5 * pixels_per_mm
 octave_height = 38.553 * pixels_per_mm
 
-string_length = 2 * pitch_classes_per_octave * generator_x_unit
-
 d = draw.Drawing(
     2 ** (1 / 4) * pixels_per_m,
     1 / (2 ** (1 / 4)) * pixels_per_m,
     origin="center",
     displayInline=False,
 )
+
+# 12-TET
+d.append(group_of_octaves(0, 0, generator_x_unit, octave_height, 13, 13, pitch_classes_per_octave, generator, math.log2(1)))
+
+# Pythagorean
+d.append(group_of_octaves(0, 0, generator_x_unit, octave_height, 13, 13, pitch_classes_per_octave, generator, math.log2(3**12/2**19) / 12))
+
+# 1/4 comma meantone
+d.append(group_of_octaves(0, 0, generator_x_unit, octave_height, 13, 13, pitch_classes_per_octave, generator, -(math.log2(3**4/((2**4)*5)) / 4)))
+
+
+string_length = 2 * pitch_classes_per_octave * generator_x_unit
 
 y = -64
 for i in [1, 2, 3, 5, 7, 11]:
@@ -92,15 +102,5 @@ for i in [1, 2, 3, 5, 7, 11]:
 
     # d.append(string)
     y -= deflection * 4
-
-
-# ET
-d.append(group_of_octaves(0, 0, generator_x_unit, octave_height, 28, 19, 12, 7, math.log2(1)))
-
-# Pythagorean
-d.append(group_of_octaves(0, 0, generator_x_unit, octave_height, 28, 19, 12, 7, math.log2(3**12/2**19) / 12))
-
-# 1/4 comma meantone
-d.append(group_of_octaves(0, 0, generator_x_unit, octave_height, 28, 19, 12, 7, -(math.log2(3**4/((2**4)*5)) / 4)))
 
 d.saveSvg("out.svg")
