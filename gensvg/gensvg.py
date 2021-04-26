@@ -10,6 +10,7 @@ stroke_color = "black"
 
 def append_layout(d, spec):
     button_group = draw.Group()
+    skew = spec[6]
 
     layout = dcompose.DCompose(8.5)
     layout.octave_start = 0.2
@@ -25,29 +26,36 @@ def append_layout(d, spec):
     layout.max_note = spec[5]
 
     buttons = layout.get_buttons()
-    print(buttons)
+
+    min_x = min([button.pos[0] for button in buttons])
+    min_y = min([button.pos[1] for button in buttons])
+    max_x = max([button.pos[0] for button in buttons])
+    max_y = max([button.pos[1] for button in buttons])
+
+    for button in buttons:
+        button.pos[0] -= (min_x + max_x) / 2
+        button.pos[1] -= min_y
 
     for button in buttons:
         button_group.append(
             draw.Circle(
                 spec[0] + button.pos[0],
-                spec[1] + button.pos[1],
+                spec[1] + button.pos[1] + skew * button.pos[0],
                 7.3,
                 stroke=stroke_color,
                 fill=fill_color,
                 stroke_width=stroke_width,
             )
         )
-        if spec[6]:
-            button_group.append(
-                draw.Text(
-                    button.name,
-                    4,
-                    spec[0] + button.pos[0],
-                    spec[1] + button.pos[1],
-                    center=True,
-                )
+        button_group.append(
+            draw.Text(
+                button.name,
+                4,
+                spec[0] + button.pos[0],
+                spec[1] + button.pos[1] + skew * button.pos[0],
+                center=True,
             )
+        )
 
     d.append(button_group)
 
@@ -75,86 +83,85 @@ d = draw.Drawing(
 string_length = 2 * pitch_classes_per_octave * generator_x_unit
 
 y = -128
-for i in [1,2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53]:
+for i in [1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53]:
     x = 0
     length = string_length / i
     midpoint = length / 2
-    deflection = (string_length / i) ** 0.5 / 2
+    deflection = (12 * (string_length / i)) ** 0.5
+    deflection = (12 * string_length) ** 0.5 / i
 
     string = draw.Group()
 
     for j in range(i):
         p = draw.Path(stroke_width=stroke_width, stroke=stroke_color, fill=fill_color)
-        for k in list(range(4)):
+        for k in range(12):
             p.M(x, y)
-            p.q(midpoint, k * deflection, length, 0)
+            p.q(midpoint, deflection * math.sin(k * math.pi / 2 / 12), length, 0)
             p.M(x + length, y)
-            p.q(-midpoint, -k * deflection, -length, 0)
+            p.q(-midpoint, -deflection * math.sin(k * math.pi / 2 / 12), -length, 0)
         string.append(p)
         x += length
 
-    d.append(string)
-    y -= deflection * 4
+    # d.append(string)
+    y -= deflection * 2
 
 
 C4 = -200
 D4 = 0
 octave = 1200
 M6 = 900
+m3 = 300
 
 layouts = [
-    # Board
-    (0, 0, D4 - octave - M6 , D4 + octave + M6, -8, 8, True),
-    # D-D 1x1
-    (200, 0, D4, D4 + octave, -8, 8, True),
-    # C-C 1x1
-    (400, 0, C4, C4 + octave, -8, 8, True),
-    # D-D 2x1
-    (200, 100, D4, D4 + octave * 2, -8, 8, True),
-    # C-C 2x1
-    (400, 100, C4, C4 + octave * 2, -8, 8, True),
-    # D-D 2x2
-    (0, 200, D4, D4 + octave * 2, -16, 16, True),
-    # C-C 2x2
-    (400, 200, C4, C4 + octave * 2, -16, 16, True),
-    # D-D 4x2
-    (0, 400, D4, D4 + octave * 4, -16, 16, True),
-    # C-C 4x2
-    (400, 400, C4, C4 + octave * 4, -16, 16, True),
-    # D-D 4x4
-    (200, 600, D4, D4 + octave * 4, -31, 31, True),
-    # C-C 4x4
-    (200, 800, C4, C4 + octave * 4, -31, 31, True),
-    # D-D 8x4
-    (200, 1200, D4, D4 + octave * 8, -31, 31, True),
-    # C-C 8x4
-    (200, 1600, C4, C4 + octave * 8, -31, 31, True),
-    # D-D 10x4
-    (200, 2000, D4, D4 + octave * 10, -31, 31, True),
-    # Grand
-    # (-1000, 1100 + 1200 * 7 + 10, -8, 8),
-    # Grander
-    # (-1000, 1100 + 1200 * 7 + 10, 0, 28),
-    # Approx. 1'-64' Organ
-    # (-1000, -1100 + 1200 * 10 + 100, 0, 28),
-    # The Experimentalist
-    # (-900 + 1200, 3300 + 1200, -8, 8),
+    (
+        16 * 2 * width,
+        256 * span,
+        board_type[0] - octave * span - board_type[1],
+        board_type[0] + octave * span + board_type[1],
+        -width,
+        width,
+        math.log2(skew),
+    )
+    for span in [1, 2, 4, 5]
+    for width in [8, 15, 31]
+    for board_type in [(D4, M6), (D4, 0), (C4, 0)]
+    for skew in [1]
 ]
 
-layouts = [
-    (x * 32, y * 300, root_note, root_note + octave * y, -x, x, print_names)
-    for x in [8, 15, 31]
-    for y in [1, 2, 4, 8, 10, 12]
-    for root_note in [D4, C4]
-    for print_names in [True]
-]
+layouts = []
+
+layouts.extend([
+    (
+        16 * 2 * width,
+        128,
+        board_type[0] - octave * span - board_type[1],
+        board_type[0] + octave * span + board_type[1],
+        -width,
+        width,
+        math.log2(skew),
+    )
+    for span in [0,1]
+    for width in [8, 15, 31]
+    for board_type in [(D4, M6), (D4, 0), (C4, 0)]
+    for skew in [1]
+])
 
 # Striso Board
-layouts.append((0, 0, D4 - octave - M6 , D4 + octave + M6, -8, 8, True))
+# layouts.append((0, 0, D4 - octave - M6, D4 + octave + M6, -8, 8, math.log2(1)))
+# Grand Striso
+# layouts.append((-8 * 32, 0, D4 - octave * 4 - M6, D4 + octave * 4 + M6, -8, 8, math.log2(1)))
+# Grander Striso
+# layouts.append((-16 * 32, 0, D4 - octave * 4 - M6, D4 + octave * 4 + M6, -15, 15, math.log2(1)))
+# layouts.append((-16 * 32, 0, D4 - octave * 4 - M6, D4 + octave * 4 + M6, -15, 15, math.log2(2/1)/12))
+# "Research" Striso
+# layouts.append((-32 * 32, 0, D4 - octave * 5 - M6, D4 + octave * 5 + M6, -31, 31, math.log2(1)))
+# 97-Key Piano
+# layouts.append((56 * 32, 0, C4 - octave *  4, C4 + octave * 4, -8, 8, math.log2(1)))
+# 1'-64' Organ
+# layouts.append((64 * 32, 0, C4 - octave *  5, C4 + octave * 5, -8, 8, math.log2(1)))
+
 # Grand Piano
-layouts.append((48 * 32, 0, C4, C4 + octave * 7 + 4, -8, 8, True))
-# Bosendorfer Piano
-layouts.append((64 * 32, 0, C4, C4 + octave * 12, -8, 8, True))
+layouts.append((48 * 32, 0, C4 - octave * 3 - m3, C4 + octave * 4, -8, 8, math.log2(1)))
 
 for layout in layouts:
     print(layout)
