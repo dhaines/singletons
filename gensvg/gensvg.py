@@ -10,7 +10,7 @@ stroke_color = "black"
 
 def append_layout(d, spec):
     button_group = draw.Group()
-    skew = spec[6]
+    skew = 4.5356 * spec[6]
 
     layout = dcompose.DCompose(8.5)
     layout.octave_start = 0.2
@@ -47,15 +47,16 @@ def append_layout(d, spec):
                 stroke_width=stroke_width,
             )
         )
-        button_group.append(
-            draw.Text(
-                button.name,
-                4,
-                spec[0] + button.pos[0],
-                spec[1] + button.pos[1] + skew * button.pos[0],
-                center=True,
+        if spec[7]:
+            button_group.append(
+                draw.Text(
+                    button.name,
+                    4,
+                    spec[0] + button.pos[0],
+                    spec[1] + button.pos[1] + skew * button.pos[0],
+                    center=True,
+                )
             )
-        )
 
     d.append(button_group)
 
@@ -115,53 +116,55 @@ m3 = 300
 layouts = [
     (
         16 * 2 * width,
-        256 * span,
+        256 * (span - 1),
         board_type[0] - octave * span - board_type[1],
         board_type[0] + octave * span + board_type[1],
         -width,
         width,
-        math.log2(skew),
+        0,
+        False
     )
+    # Single, Double, Imperial Concert Grand, Midmer-Losh Organ
     for span in [1, 2, 4, 5]
+    # for span in [1, 5]
+    # Single, Double, or Quadruple degrees of 
     for width in [8, 15, 31]
+    # for width in [31]
+    # Striso Board, DCompose, LegaC DCompose
     for board_type in [(D4, M6), (D4, 0), (C4, 0)]
-    for skew in [1]
+    # for board_type in [(D4, 0)]
+    # 12-TET, Pythagorean, 1/4 Comma Meantone
+    for skew in [math.log2(1)]
 ]
 
-layouts = []
+# layouts = []
 
+# All the notes in all the tunings
 layouts.extend([
     (
-        16 * 2 * width,
-        128,
-        board_type[0] - octave * span - board_type[1],
-        board_type[0] + octave * span + board_type[1],
-        -width,
-        width,
-        math.log2(skew),
+        1536 + (640 if show_notes == False else 0),
+        0 + 512 * skew[0],
+        D4 - octave * 5,
+        D4 + octave * 5,
+        -31,
+        31,
+        skew[1],
+        show_notes
     )
-    for span in [0,1]
-    for width in [8, 15, 31]
-    for board_type in [(D4, M6), (D4, 0), (C4, 0)]
-    for skew in [1]
+    for skew in [
+        # Equal temperment
+        (0, 0),
+        # Pythagorean
+        (1, math.log2(3**12/2**19)/12),
+        # 1/4 Comma Meantone
+        (2, math.log2(125/128)/12),
+    ]
+    for show_notes in [True, False]
 ])
 
-# Striso Board
-# layouts.append((0, 0, D4 - octave - M6, D4 + octave + M6, -8, 8, math.log2(1)))
-# Grand Striso
-# layouts.append((-8 * 32, 0, D4 - octave * 4 - M6, D4 + octave * 4 + M6, -8, 8, math.log2(1)))
-# Grander Striso
-# layouts.append((-16 * 32, 0, D4 - octave * 4 - M6, D4 + octave * 4 + M6, -15, 15, math.log2(1)))
-# layouts.append((-16 * 32, 0, D4 - octave * 4 - M6, D4 + octave * 4 + M6, -15, 15, math.log2(2/1)/12))
-# "Research" Striso
-# layouts.append((-32 * 32, 0, D4 - octave * 5 - M6, D4 + octave * 5 + M6, -31, 31, math.log2(1)))
-# 97-Key Piano
-# layouts.append((56 * 32, 0, C4 - octave *  4, C4 + octave * 4, -8, 8, math.log2(1)))
-# 1'-64' Organ
-# layouts.append((64 * 32, 0, C4 - octave *  5, C4 + octave * 5, -8, 8, math.log2(1)))
-
 # Grand Piano
-layouts.append((48 * 32, 0, C4 - octave * 3 - m3, C4 + octave * 4, -8, 8, math.log2(1)))
+layouts.append((0, 0, C4 - octave * 3 - m3, C4 + octave * 4, -8, 8, 0, True))
+layouts.append((0, 512, C4 - octave * 3 - m3, C4 + octave * 4, -8, 8, 0, False))
 
 for layout in layouts:
     print(layout)
