@@ -84,11 +84,10 @@ d = draw.Drawing(
 string_length = 2 * pitch_classes_per_octave * generator_x_unit
 
 y = -128
-for i in [1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53]:
+for i in range(1,16):
     x = 0
     length = string_length / i
     midpoint = length / 2
-    deflection = (12 * (string_length / i)) ** 0.5
     deflection = (12 * string_length) ** 0.5 / i
 
     string = draw.Group()
@@ -103,7 +102,7 @@ for i in [1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53]:
         string.append(p)
         x += length
 
-    # d.append(string)
+    d.append(string)
     y -= deflection * 2
 
 
@@ -124,17 +123,17 @@ layouts = [
         0,
         False
     )
-    # Single, Double, Imperial Concert Grand, Midmer-Losh Organ
-    for span in [1, 2, 4, 5]
-    # for span in [1, 5]
+
+
+    # Single/Striso Board Physical, Double, Triple/Striso Board Virtual, Imperial Concert Grand, Midmer-Losh Organ
+    for span in [1, 2, 3, 4, 5]
+
     # Single, Double, or Quadruple degrees of 
     for width in [8, 15, 31]
-    # for width in [31]
+
     # Striso Board, DCompose, LegaC DCompose
     for board_type in [(D4, M6), (D4, 0), (C4, 0)]
-    # for board_type in [(D4, 0)]
-    # 12-TET, Pythagorean, 1/4 Comma Meantone
-    for skew in [math.log2(1)]
+
 ]
 
 # layouts = []
@@ -152,12 +151,37 @@ layouts.extend([
         show_notes
     )
     for skew in [
+        # 5TET (Major third = fourth; minor sixth = fifth)
+        (3, math.log2(2 ** (1/5))/12),
+
+        # Pythagorean (raise enharmonic equivalent diminished second by a Pythagorean Comma)
+        (2, math.log2(3**12/2**19)/12),
+
+        # 1/12 Comma Meantone (raise enharmonic equivalent diminished second by a schisma)
+        (1, math.log2(32805/32768)),
+
         # Equal temperment
         (0, 0),
-        # Pythagorean
-        (1, math.log2(3**12/2**19)/12),
-        # 1/4 Comma Meantone
-        (2, math.log2(125/128)/12),
+
+        # 1/6 Comma Meantone (lower enharmonic equivalent diminished second by a diaschisma)
+        (-1, -math.log2(2048/2025)/12),
+
+        # 31TET
+        (-2, -math.log2(2 ** (1/31))/12),
+
+        # 1/4 Comma Meantone (lower enharmonic equivalent diminished second by a diesis)
+        (-3, -math.log2(128/125)/12),
+
+        # 1/3 Comma Meantone (lower enharmonic equivalent diminished second by a greater diesis)
+        (-4, -math.log2(648/625)/12),
+
+        # 19TET
+        (-5, -math.log2(2 ** (1/19))/12),
+        
+        # 7TET (accidentals = naturals)
+        (-6, -math.log2(2 ** (1/7))/12),
+
+
     ]
     for show_notes in [True, False]
 ])
@@ -165,6 +189,9 @@ layouts.extend([
 # Grand Piano
 layouts.append((0, 0, C4 - octave * 3 - m3, C4 + octave * 4, -8, 8, 0, True))
 layouts.append((0, 512, C4 - octave * 3 - m3, C4 + octave * 4, -8, 8, 0, False))
+
+# Single Octave
+layouts.extend((-512 + root * 4, 96 * math.log2(width + 1) - 96 * 2 , root, root + octave, -width, width, 0, False) for root in [C4,D4] for width in [8, 15, 31])
 
 for layout in layouts:
     print(layout)
