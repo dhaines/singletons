@@ -81,14 +81,14 @@ d = draw.Drawing(
 )
 
 
-string_length = 2 * pitch_classes_per_octave * generator_x_unit
+string_length = pitch_classes_per_octave * generator_x_unit / 2
 
 y = -128
 for i in range(1,16):
     x = 0
     length = string_length / i
     midpoint = length / 2
-    deflection = (12 * string_length) ** 0.5 / i
+    deflection = (12 * string_length) / (64 * ((1 + math.sqrt(3)) / 2) * i ** (1/2))
 
     string = draw.Group()
 
@@ -192,6 +192,7 @@ layouts.append((0, 512, C4 - octave * 3 - m3, C4 + octave * 4, -8, 8, 0, False))
 
 # Single Octave
 layouts.extend((-512 + root * 4, 96 * math.log2(width + 1) - 96 * 2 , root, root + octave, -width, width, 0, False) for root in [C4,D4] for width in [8, 15, 31])
+layouts.extend((-2048, 96 * math.log2(width + 1) - 96 * 2 , root - M6, root + octave + M6, -width, width, 0, False) for root in [D4] for width in [8, 15, 31])
 
 for layout in layouts:
     print(layout)
